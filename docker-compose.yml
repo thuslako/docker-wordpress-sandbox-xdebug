@@ -1,0 +1,49 @@
+version: '3'
+services:
+  wordpress:
+    container_name: wordpress
+    restart: always
+    ports:
+      - 8000:80
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file: 
+      - docker.env
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: wpdb
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      # - ./wp-content:/var/www/html/wp-content -- you can expose if needed 
+      - ./xdebug.ini:/usr/local/etc/php/php.ini
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wpdb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - db:/var/lib/mysql
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin:4.8
+    restart: always
+    ports:
+      - '8181:80'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+volumes:
+  wordpress:
+  phpmyadmin:
+  db:
